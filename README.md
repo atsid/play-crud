@@ -49,7 +49,7 @@ Define a simple crud controller for one of your model objects:
     
 
     
-In your routes file, you define your route like:
+In your routes file, you define your routes like the following:
 
 	# The @ is very important here
     GET     /users                      @controllers.Users.list(offset: Integer ?= 0, count: Integer ?= null, orderBy: String ?= null, fields: String ?= null, fetches: String ?= null, q: String ?= null)
