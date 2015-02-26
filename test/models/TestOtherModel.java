@@ -26,6 +26,8 @@ public class TestOtherModel extends AbstractBaseModel {
     @FieldDescription(type = FieldType.DATETIME)
     public Date myDateTime;
 
+    public String randomFieldManyToManyCrud;
+
     @OneToOne
     public TestYetAnotherModel testYetAnotherModel;
 }

@@ -10,6 +10,7 @@ import scala.collection.JavaConverters._
  */
 class ManyToManyCrudControllerTest extends BaseCrudControllerTest[TestOtherModel](classOf[TestOtherModel]) {
 
+  override def getUniqueFieldName(): String =  "randomFieldManyToManyCrud";
   override def getControllerInstance(): CrudController[TestOtherModel] = new TestManyToManyCrudController()
   override def getParentQuery: Query[TestOtherModel] = {
     val rightIds =

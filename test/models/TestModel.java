@@ -26,6 +26,8 @@ public class TestModel extends AbstractBaseModel {
     @FieldDescription(type = FieldType.DATETIME)
     public Date myDateTime;
 
+    public String randomFieldCrud;
+
     @OneToMany(cascade = CascadeType.REMOVE)
     public List<TestNestedModel> nestedModel;
 }

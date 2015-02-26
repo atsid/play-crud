@@ -26,6 +26,8 @@ public class TestNestedModel extends AbstractBaseModel {
     @FieldDescription(type = FieldType.DATETIME)
     public Date myDateTime;
 
+    public String randomFieldOneToManyCrud;
+
     @ManyToOne
     @JsonIgnore
     public TestModel testModel;

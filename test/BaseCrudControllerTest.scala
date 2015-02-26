@@ -157,6 +157,16 @@ abstract class BaseCrudControllerTest[M <: Model] extends Specification  {
       items.size must be equalTo(2)
     }
 
+    "testListWithFieldsDoesntCrash" in new HttpContextBeforeAfter(testSql) {
+      val result: Result = list(getControllerInstance(), 0, 2, fields = getUniqueFieldName);
+      status(result) must be equalTo(200);
+      contentType(result) must be equalTo("application/json");
+
+      val node: JsonNode = Util.parseJson(contentAsString(result))
+      val items: List[M] = Util.fromJson(node.get("data"), classOf[List[M]])
+      items.size must be equalTo(2)
+    }
+
     "testListOffset" in new HttpContextBeforeAfter(testSql) {
       val result: Result = list(getControllerInstance(), 1, 1, "id");
       status(result) must be equalTo(200);
@@ -606,6 +616,8 @@ abstract class BaseCrudControllerTest[M <: Model] extends Specification  {
   def getControllerInstance() : CrudController[M];
 
   def getNestedField() : String;
+
+  def getUniqueFieldName(): String;
 
   // Helpers
   def list(controller: CrudController[_], offset:Integer = 0, count:Integer = null, orderBy:String = null, fields:String = null, fetches:String  = null, q:String = null, userId: java.lang.Long = 1) : play.mvc.Result = {

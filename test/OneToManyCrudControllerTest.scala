@@ -8,6 +8,7 @@ import models.{TestModel, TestNestedModel}
  */
 class OneToManyCrudControllerTest extends BaseCrudControllerTest[TestNestedModel](classOf[TestNestedModel]) {
 
+  override def getUniqueFieldName(): String = "randomFieldOneToManyCrud";
   override def getControllerInstance(): CrudController[TestNestedModel] = new TestOneToManyCrudController()
   override def getParentQuery: Query[TestNestedModel] = {
     super.getParentQuery.where().eq("testModel.id", 1).query;
