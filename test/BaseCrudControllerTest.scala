@@ -6,6 +6,7 @@ import com.atsid.play.models.schema.{FieldType, FieldDescriptor}
 import com.avaje.ebean.{Ebean, Query}
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ArrayNode
+import com.fasterxml.jackson.databind.node.ObjectNode
 import org.specs2.mutable.Specification
 import org.specs2.specification.{Step, Fragments}
 import play.db.ebean.Model
@@ -16,6 +17,7 @@ import java.util._
 import play.test.Helpers._
 import utils.{ScriptRunnerBeforeAfter, TestUtils}
 import scala.collection.JavaConverters._
+import scala.collection.immutable.HashSet;
 
 abstract class BaseCrudControllerTest[M <: Model] extends Specification  {
 
@@ -40,6 +42,7 @@ abstract class BaseCrudControllerTest[M <: Model] extends Specification  {
   var dateTimeProp = "myDateTime";
 
   var testSql =
+
     """
       INSERT INTO test_model(id, my_string) VALUES
         (1, '1'),
@@ -155,6 +158,49 @@ abstract class BaseCrudControllerTest[M <: Model] extends Specification  {
       val node: JsonNode = Util.parseJson(contentAsString(result))
       val items: List[M] = Util.fromJson(node.get("data"), classOf[List[M]])
       items.size must be equalTo(2)
+    }
+
+    "testListWithAllStringFields" in new HttpContextBeforeAfter(testSql) {
+      val fields: Seq[String] = modelFields.filter(n => n.getType.equals(classOf[String])).map(_.getName).toSeq;
+      val result: Result = list(getControllerInstance(), 0, 2, fields = fields.mkString(","));
+      status(result) must be equalTo(200);
+      contentType(result) must be equalTo("application/json");
+
+      val node: ArrayNode = Util.parseJson(contentAsString(result)).get("data").asInstanceOf[ArrayNode];
+
+      val firstItem = node.get(0).asInstanceOf[ObjectNode]
+      val fieldsToCheck : Seq[String] = (fields ++ Seq[String]("id"));
+      val returnedProps = firstItem.fields().asScala.map(n => n.getKey).toSet.diff(fieldsToCheck.toSet);
+
+      returnedProps.size must be equalTo(0)
+    }
+
+    "testListWithOneField" in new HttpContextBeforeAfter(testSql) {
+      val fields: Seq[String] = Seq(modelFields.filter(n => n.getType.equals(classOf[String])).head.getName);
+      val result: Result = list(getControllerInstance(), 0, 2, fields = fields.mkString(","));
+      status(result) must be equalTo(200);
+      contentType(result) must be equalTo("application/json");
+
+      val node: ArrayNode = Util.parseJson(contentAsString(result)).get("data").asInstanceOf[ArrayNode];
+
+      val firstItem = node.get(0).asInstanceOf[ObjectNode]
+      val fieldsToCheck : Seq[String] = (fields ++ Seq[String]("id"));
+      val returnedProps = firstItem.fields().asScala.map(n => n.getKey).toSet.diff(fieldsToCheck.toSet[String]);
+
+      returnedProps.size must be equalTo(0)
+    }
+
+    "testListWithUniqueFields" in new HttpContextBeforeAfter(testSql) {
+      val result: Result = list(getControllerInstance(), 0, 2, fields = getUniqueFieldName);
+      status(result) must be equalTo(200);
+      contentType(result) must be equalTo("application/json");
+
+      val node: ArrayNode = Util.parseJson(contentAsString(result)).get("data").asInstanceOf[ArrayNode];
+
+      val firstItem = node.get(0).asInstanceOf[ObjectNode]
+      val returnedProps = firstItem.fields().asScala.map(n => n.getKey).toSet.diff(HashSet[String]("id", getUniqueFieldName()));
+
+      returnedProps.size must be equalTo(0)
     }
 
     "testListOffset" in new HttpContextBeforeAfter(testSql) {
@@ -606,6 +652,8 @@ abstract class BaseCrudControllerTest[M <: Model] extends Specification  {
   def getControllerInstance() : CrudController[M];
 
   def getNestedField() : String;
+
+  def getUniqueFieldName(): String;
 
   // Helpers
   def list(controller: CrudController[_], offset:Integer = 0, count:Integer = null, orderBy:String = null, fields:String = null, fetches:String  = null, q:String = null, userId: java.lang.Long = 1) : play.mvc.Result = {

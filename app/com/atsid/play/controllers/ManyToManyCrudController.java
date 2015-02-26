@@ -476,7 +476,7 @@ public class ManyToManyCrudController<L extends Model, J extends Model, R extend
             ids.add(EbeanUtil.getFieldValue((R) junction._ebean_getField(fieldIndex, junction), "id"));
         }
         Query<R> query = createQuery(params);
-        handleFieldsAndFetches(query, params);
+        handleFieldsAndFetches(query, rightClass, params);
 
         // ?orderBy=name asc
         if (params.orderBy != null && params.orderBy.length > 0) {
