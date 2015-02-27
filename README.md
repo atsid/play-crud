@@ -1,13 +1,13 @@
 # Play-crud
 
-Play-crud provides a set of controllers that provide basic crud functionality to any class that inherits from them. 
+Play-crud provides a set of controllers that provide basic crud functionality to any class that inherits from them.
 
 ![Build Status](https://travis-ci.org/atsid/play-crud.svg?branch=master)
 
 ## Requirements
 
- * [Play Framework 2.x](http://www.playframework.com)
- * [Ebean 3.4.1](https://github.com/atsid/avaje-ebeanorm/tree/3.4.x) - Play-crud uses a modified version of Ebean, the jar can be found in the **lib** directory of this project.
+* [Play Framework 2.x](http://www.playframework.com)
+* [Ebean 3.4.1](https://github.com/atsid/avaje-ebeanorm/tree/3.4.x) - Play-crud uses a modified version of Ebean, the jar can be found in the **lib** directory of this project.
     * Requires a compatibility patch to be added to your Build.scala file, see [Getting Started](#getting-started).
 
 ## Getting Started
@@ -16,55 +16,60 @@ Add the following lines to your Build.scala:
 ```
 val playCrudPlugin = RootProject(uri("git://github.com/atsid/play-crud.git"))
 val myProject = play.Project(
-     ....
-     
-  )
-  .settings(libraryDependencies += "com.typesafe.play" % "play-ebean-33-compat" % "1.0.1") // A compatibility patch for Ebean 3.4.1
-  .dependsOn(playCrudPlugin); // Adds the play-crud project as a dependency
+    ....
+
+)
+.settings(libraryDependencies += "com.typesafe.play" % "play-ebean-33-compat" % "1.0.1") // A compatibility patch for Ebean 3.4.1
+.dependsOn(playCrudPlugin); // Adds the play-crud project as a dependency
 ```
 
-### Add the following lines to your GlobalSettings file:
 
-  import com.atsid.play.controllers.CrudController;
+Add the following lines to your GlobalSettings file:
+
+    import com.atsid.play.controllers.CrudController;
 
     public class Global extends GlobalSettings {
         private Injector injector;
-            
+
         @Override
         public void onStart(Application app) {
             injector = Guice.createInjector();
         }
-        
+
         @Override
         public <A> A getControllerInstance(Class<A> clazz) throws Exception {
             // This returns an instance of your CRUD controllers
             if (CrudController.class.isAssignableFrom(clazz)) {
                 return injector.getInstance(clazz);
-            } 
+            }
             return super.getControllerInstance(clazz);
         }
     }
-    
+
+Now you can start utilizing the crud controllers.
+
+## Basic Crud Controller Example
+
 Define a simple crud controller for one of your model objects:
 
-  public class Users extends CrudController<User> {
-      public Users() {
+    public class Users extends CrudController<User> {
+        public Users() {
             super(User.class);
         }
     }
-    
 
-    
+
+
 In your routes file, you define your routes like the following:
 
-  # The @ is very important here
+    # The @ is very important here
     GET     /users                      @controllers.Users.list(offset: Integer ?= 0, count: Integer ?= null, orderBy: String ?= null, fields: String ?= null, fetches: String ?= null, q: String ?= null)
     POST    /users                      @controllers.Users.create()
     GET     /users/:id                  @controllers.Users.read(id: Long, fields: String ?= null, fetches: String ?= null)
     PUT     /users/:id                  @controllers.Users.update(id: Long)
     DELETE  /users/:id                  @controllers.Users.delete(id: Long)
 
-
+There are some required properties on your models, see [General Notes](#general-notes) for more information, but you're basically done.
 
 ## Controllers
 
@@ -81,25 +86,25 @@ Provides basic CRUD operations for a set of models in a parent child (or one to 
 For Example, if you had a Person that had Animals, you might have your models defined like this:
 
     public class Person extends Model {
-    
+
         @Id
         @GeneratedValue(strategy= GenerationType.IDENTITY)
         public Long id;
 
         public String name;
-        
+
         @OneToMany
         public List<Animal> animals;
     }
-    
+
     public class Animal extends Model {
-    
+
         @Id
         @GeneratedValue(strategy= GenerationType.IDENTITY)
         public Long id;
 
-      public String name;
-        
+        public String name;
+
         @ManyToOne
         @JsonIgnore
         public Person owner;
@@ -107,12 +112,12 @@ For Example, if you had a Person that had Animals, you might have your models de
 
 You would then define your controller like:
 
-  public class PersonAnimals extends OneToManyCrudController<Person, Animal> {
-      public PersonAnimals() {
+    public class PersonAnimals extends OneToManyCrudController<Person, Animal> {
+        public PersonAnimals() {
             super(Person.class, Animal.class);
         }
     }
-    
+
 In your routes file:
 
     # The @ is very important here
@@ -121,7 +126,7 @@ In your routes file:
     GET     /person/:pid/animals/:id                  @controllers.PersonAnimals.read(pid: Long, id: Long, fields: String ?= null, fetches: String ?= null)
     PUT     /person/:pid/animals/:id                  @controllers.PersonAnimals.update(pid: Long, id: Long)
     DELETE  /person/:pid/animals/:id                  @controllers.PersonAnimals.delete(pid: Long, id: Long)
-    
+
 
 Notice the `:pid` argument, this binds the service calls to the parent model with that id, and all actions performed to the animals are related to that parent automatically.
 
@@ -132,65 +137,65 @@ Provides basic CRUD operations for a set of models in a many to many relationshi
 For Example, if you had a Teacher and Student relationship.  A Student can have many Teachers, and a Teacher can have many students.  In order to do this in the database world, you might have to set up your models like this:
 
     public class Student extends Model {
-    
+
         @Id
         @GeneratedValue(strategy= GenerationType.IDENTITY)
         public Long id;
 
         public String name;
-        
+
         @OneToMany
         public List<TeachStudent> teachers;
     }
-    
+
     public class TeacherStudent extends Model {
 
         @Id
         @GeneratedValue(strategy= GenerationType.IDENTITY)
         public Long id;
-        
+
         @ManyToOne
         public Student student;
-        
+
         @ManyToOne
         public Teacher teacher;
     }
-    
+
     public class Teacher extends Model {
 
         @Id
         @GeneratedValue(strategy= GenerationType.IDENTITY)
         public Long id;
-        
-      public String name;
-        
+
+        public String name;
+
         @OneToMany
         @JsonIgnore
         public List<TeacherStudents> students;
-        
+
         @OneToMany
         @JsonIgnore
-        public List<Class> classes;
+        public List<SchoolClass> classes;
     }
-    
-    public class Class extends Model {
+
+    public class SchoolClass extends Model {
 
         @Id
         @GeneratedValue(strategy= GenerationType.IDENTITY)
         public Long id;
-        
-      public String name;
+
+        public String name;
     }
 
 
 You would then define your controller like:
 
-  public class TeacherStudents extends OneToManyCrudController<Teacher, TeacherStudent, Student> {
-      public TeacherStudents() {
+    public class TeacherStudents extends OneToManyCrudController<Teacher, TeacherStudent, Student> {
+        public TeacherStudents() {
             super(Teacher.class, TeacherStudent.class, Student.class);
         }
     }
-    
+
 In your routes file:
 
     # The @ is very important here
@@ -199,7 +204,7 @@ In your routes file:
     GET     /teacher/:pid/students/:id                  @controllers.TeacherStudents.read(pid: Long, id: Long, fields: String ?= null, fetches: String ?= null)
     PUT     /teacher/:pid/students/:id                  @controllers.TeacherStudents.update(pid: Long, id: Long)
     DELETE  /teacher/:pid/students/:id                  @controllers.TeacherStudents.delete(pid: Long, id: Long)
-    
+
 
 Notice the `:pid` argument, this binds the service calls to the parent model with that id, and all actions performed to the animals are related to that parent automatically.  ManyToManyController will manage the junctions automatically.  In this example, the service calls return a `Student` model object.  The junction model is completely transparent to the client.
 
@@ -208,11 +213,11 @@ Notice the `:pid` argument, this binds the service calls to the parent model wit
 
 All the controllers provide the following methods
 
-* [List](#list)
-* [Create](#create)
-* [Read](#read)
-* [Update](#update)
-* [Delete](#delete)
+  * [List](#list)
+  * [Create](#create)
+  * [Read](#read)
+  * [Update](#update)
+  * [Delete](#delete)
 
 ###list
 
@@ -226,7 +231,7 @@ All the controllers provide the following methods
 #####offset
 The initial index of the results to return
 
-#####count 
+#####count
 The number of results to return
 
 #####orderBy
@@ -234,69 +239,70 @@ A comma delimited list of fields to order by, in the format: `<fieldName> <asc|d
 
 #####fields
 
- A comma delimited list of fields to return when calling the given service.  For example, a users service might return something like the following when called:
- 
-     "data": [{
-          "id": "1", // The id of the user
-          "name": "....",
-          "birthDate": "....",
-          "email": "...."
-     }, {
+A comma delimited list of fields to return when calling the given service.  For example, a users service might return something like the following when called:
+
+    "data": [{
+        "id": "1", // The id of the user
+        "name": "....",
+        "birthDate": "....",
+        "email": "...."
+    }, {
         "id": "2" // Id of the second student
         ...
-     }]
-     
+    }]
+
 The fields parameter allows you to control which fields get returned in the payload.  For example, if you called the users service with the following `/api/users?fields=email`, only the `name` and `email` fields will be returned on each user, `id` field is **always** returned.
 
-      "data": [{
-          "id": "1", // The id of the user
-          "email": "...."
-     }, {
+    "data": [{
+        "id": "1", // The id of the user
+        "email": "...."
+    }, {
         "id": "2" // Id of the second student
         ...
-     }]
-     
+    }]
+
 The fields parameter also works on nested objects, see [fetches](#fetches) on how to retrieve nested objects.
-     
-     
+
+
 #####fetches
- A comma delimited list of nested objects to return when calling the given service.
-  By default, services which support this parameter will do the following:
-  
+A comma delimited list of nested objects to return when calling the given service.
+By default, services which support this parameter will do the following:
+
   - For child objects with a one to one relationship, the service will only return their id properties
   - For child objects with a one to many relationship, the service will NOT return those child objects at all.
 
 So, for example, without setting the *fetches* paramter, the TeachersStudents list service will return something similar to:
 
-     "data": [{
-          "id": "1", // The id of the student
-          "name": "....",
-          "teachers": [{
-              "id": "1"
-          }]
-     }, {
+    "data": [{
+        "id": "1", // The id of the student
+        "name": "....",
+        "teachers": [{
+            "id": "1"
+        }]
+    }, {
         "id": "2" // Id of the second student
         ...
-     }]
-     
+    }]
+
 So, say we wanted to return all the teacher's names that this student has, then we would need to call the service with the *fetches* property equal to *teachers* (`/api/teachers/1/students?fetches=teachers`) to tell the service to return, or "fetch", the *teachers* property.  Doing that will return something like the following from the service:
 
-     "data": [{
-          "id": "1", // The id of the student
-          "name": "....",
-          "teachers": [{
-              "id": "1",
-              "name": "Sally Joe",
-              "classes": [{              
-                  "id": "1"
-              }]
-          }]
-     }, {
+    "data": [{
+        "id": "1", // The id of the student
+        "name": "....",
+        "teachers": [{
+            "id": "1",
+            "name": "Sally Joe",
+            "classes": [{
+                "id": "1"
+            }]
+        }]
+    }, {
         "id": "2" // Id of the second student
         ...
-     }]
-     
+    }]
+
 You will notice a few things:
+
   - Each of the teachers are mostly hydrated.
   - Properties like *name* are returned because they are not nested objects, but simple properties on the students teacher.
   - The child objects of each of the teachers (*classes*) are only returning their *id* properties, because of the same reason stated earlier.
@@ -307,8 +313,8 @@ For example, to include the *classes* object for each of the teachers, you must 
 
 ####Returns
 
-* *200* (application/json) - If successful
-* *400* (application/json) - If any of the query string parameters are incorrect or invalid.
+  * *200* (application/json) - If successful
+  * *400* (application/json) - If any of the query string parameters are incorrect or invalid.
 
 ### create
 
@@ -316,8 +322,8 @@ Adds a new model to the database, and returns the new model.  The payload must b
 
 ####Returns
 
-* *201* (application/json) - If successful
-* *400* (application/json) - If the json payload is invalid
+  * *201* (application/json) - If successful
+  * *400* (application/json) - If the json payload is invalid
 
 ### read
 
@@ -325,9 +331,9 @@ Returns a specific model object by id.
 
 ####Returns
 
-* *200* (application/json) - If successful
-* *400* (application/json) - If the fields or fetches were invalid
-* *404* (application/json) - If there is no object with that id
+  * *200* (application/json) - If successful
+  * *400* (application/json) - If the fields or fetches were invalid
+  * *404* (application/json) - If there is no object with that id
 
 ### update
 
@@ -335,17 +341,17 @@ Similar to [create](#create), this method updates a given model by id.
 
 ####Returns
 
-* *200* (application/json) - If successful
-* *400* (application/json) - If the json payload is invalid
-* *404* (application/json) - If there is no object with that id
+  * *200* (application/json) - If successful
+  * *400* (application/json) - If the json payload is invalid
+  * *404* (application/json) - If there is no object with that id
 
 
 ### delete
 
 Deletes given model by id.
 
-* *204* (application/json) - If successful
-* *404* (application/json) - If there is no object with that id
+  * *204* (application/json) - If successful
+  * *404* (application/json) - If there is no object with that id
 
 ##General Notes
 
@@ -361,4 +367,3 @@ Most services return a wrapped response around their models, similar to the foll
         "count": <The number of items returned in this request>
         "data": <model> or [<model>]
     }
-
