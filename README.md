@@ -219,25 +219,26 @@ All the controllers provide the following methods
   * [Update](#update)
   * [Delete](#delete)
 
+---
+
 ###list
 
-####Signature
+#####Signature
 
 **list(Integer offset, Integer count, String orderBy, String fields, final String fetches, final String queryString)**
 
+#####Parameters
 
-####Parameters
-
-#####offset
+######offset
 The initial index of the results to return
 
-#####count
+######count
 The number of results to return
 
-#####orderBy
+######orderBy
 A comma delimited list of fields to order by, in the format: `<fieldName> <asc|desc>, ...`, for example: `firstName asc, lastName desc`
 
-#####fields
+######fields
 
 A comma delimited list of fields to return when calling the given service.  For example, a users service might return something like the following when called:
 
@@ -264,7 +265,7 @@ The fields parameter allows you to control which fields get returned in the payl
 The fields parameter also works on nested objects, see [fetches](#fetches) on how to retrieve nested objects.
 
 
-#####fetches
+######fetches
 A comma delimited list of nested objects to return when calling the given service.
 By default, services which support this parameter will do the following:
 
@@ -311,44 +312,78 @@ Because of that last point, the fetches parameter also supports a special dot no
 
 For example, to include the *classes* object for each of the teachers, you must add the path *teachers.classes* to the fetches parameter.  This is because the path to the *classes* object is through the *teachers* property.  Doing so will then produce a url which would look like: `/api/teachers/1/students?fetches=teachers,teachers.classes`.
 
-####Returns
+#####Returns
 
   * *200* (application/json) - If successful
   * *400* (application/json) - If any of the query string parameters are incorrect or invalid.
+
+---
 
 ### create
 
 Adds a new model to the database, and returns the new model.  The payload must be a json representation of the model used by the service being called (e.g. if you use a Users service, it expects a User model object, in json).
 
-####Returns
+#####Signature
+
+**create()**
+
+#####Request Body (application/json)
+
+A json object representation of the crud controller model object.
+
+#####Returns
 
   * *201* (application/json) - If successful
-  * *400* (application/json) - If the json payload is invalid
+  * *400* (application/json) - If the request body is invalid
+
+---
 
 ### read
 
 Returns a specific model object by id.
 
-####Returns
+#####Signature
 
-  * *200* (application/json) - If successful
+**read(Long id)**
+
+#####Returns
+
+  * *200* (application/json) - If successful, a json representation of the crud controllers model.
   * *400* (application/json) - If the fields or fetches were invalid
   * *404* (application/json) - If there is no object with that id
+
+---
+
 
 ### update
 
 Similar to [create](#create), this method updates a given model by id.
 
-####Returns
+#####Signature
 
-  * *200* (application/json) - If successful
-  * *400* (application/json) - If the json payload is invalid
+**update(Long id)**
+
+#####Request Body (application/json)
+
+A json object representation of the crud controller model object.
+
+#####Returns
+
+  * *200* (application/json) - If successful, a json representation of the crud controllers model.
+  * *400* (application/json) - If the request body is invalid
   * *404* (application/json) - If there is no object with that id
 
+---
 
 ### delete
 
 Deletes given model by id.
+
+#####Signature
+
+**delete(Long id)**
+
+#####Returns
 
   * *204* (application/json) - If successful
   * *404* (application/json) - If there is no object with that id
