@@ -27,7 +27,7 @@ public class AssociationFinder {
      * Returns true if the given field has the given annotation
      * @param f
      * @param c
-     * @return
+     * @return True if this given Field has the given annotation class
      */
     private static boolean hasAnnotation(Field f, Class c) {
         return f.getAnnotation(c) != null;
@@ -37,7 +37,7 @@ public class AssociationFinder {
      * Finds a list of associations between the given model class, and all other models
      * @param clazz The class to find the associations for
      * @param <M> The model type
-     * @return
+     * @return The list of associated model classes to the given class
      */
     public static <M extends Model> List<Class<? extends Model>> findClassAssociations(Class<M> clazz) {
         return findClassAssociations(clazz, false);
@@ -47,7 +47,8 @@ public class AssociationFinder {
      * Finds a list of associations between the given model class, and all other models
      * @param clazz The class to find the associations for
      * @param <M> The model type
-     * @return
+     * @param requiredOnly Returns only assocations that are marked with the Constraints.Required annotation.
+     * @return The list of associated model classes to the given class
      */
     public static <M extends Model> List<Class<? extends Model>> findClassAssociations(Class<M> clazz, boolean requiredOnly) {
         return filterClassAssociations(findAssociations(clazz), requiredOnly);

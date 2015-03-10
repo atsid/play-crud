@@ -31,7 +31,7 @@ import java.util.List;
 *
 * X G list
 * X   - fields, fetches, order, off, count, query
-* X create: assoc & create, always append
+* X create: assoc &amp; create, always append
 * O   - batch
 * X U update: update obj, support single and multiple ?
 * O   - batch?
