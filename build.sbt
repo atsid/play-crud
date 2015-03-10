@@ -18,6 +18,8 @@ libraryDependencies ++= Seq(
 
 play.Project.playJavaSettings
 
+crossPaths := false
+
 useGpg := true
 
 publishTo <<= version { v: String =>
