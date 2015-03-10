@@ -36,6 +36,7 @@ object TestUtils {
     val conf: Map[String, AnyRef] = new HashMap[String, AnyRef]
     conf.put("db.default.driver", "org.h2.Driver")
     conf.put("db.default.url", "jdbc:h2:mem:play-test;DB_CLOSE_DELAY=-1;MODE=MYSQL;DB_CLOSE_ON_EXIT=FALSE")
+    conf.put("ebean.default", "models.*")
     conf.put("elasticsearch.indexDataInitially", Boolean.box(false))
     conf.put("elasticsearch.indexDataPeriodically", Boolean.box(false))
     app = fakeApplication(conf, includedPlugins, excludedPlugins)
