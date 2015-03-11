@@ -33,7 +33,7 @@ publishArtifact in Test := false
 pomIncludeRepository := { _ => false }
 
 pomExtra := (
-<url>https://github.com/atsid/play-crud</url>
+  <url>https://github.com/atsid/play-crud</url>
   <licenses>
     <license>
       <name>Apache 2.0</name>
@@ -47,9 +47,12 @@ pomExtra := (
   </scm>
   <developers>
     <developer>
-      <id>atsid</id>
-      <name>Applied Technical Systems</name>
-      <url>https://github.com/atsid</url>
+      <id>david.tittsworth</id>
+      <name>David Tittsworth</name>
+      <email>david.tittsworth@atsid.com</email>
+      <url>https://github.com/stopyoukid</url>
+      <organization>ATS</organization>
+      <organizationUrl>https://github.com/atsid</organizationUrl>
     </developer>
   </developers>
 )
