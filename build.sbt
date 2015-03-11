@@ -2,7 +2,7 @@ name := "play-crud"
 
 organization := "com.atsid"
 
-version := "0.9-SNAPSHOT"
+version := "0.9.1"
 
 libraryDependencies ++= Seq(
     javaJdbc,
@@ -25,6 +25,8 @@ publishTo <<= version { v: String =>
   else
     Some("releases" at nexus + "service/local/staging/deploy/maven2")
 }
+
+javacOptions ++= Seq("-source", "1.6", "-target", "1.6")
 
 publishMavenStyle := true
 
