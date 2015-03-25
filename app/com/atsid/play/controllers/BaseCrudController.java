@@ -709,7 +709,7 @@ public abstract class BaseCrudController<I, T extends Model> extends Controller 
         if (validate == true) {
             Form<T> form = new Form<T>(getBaseModelClass()).bind(Util.toJson(model));
             if (form.hasErrors()) {
-                return new ResultOrValue<T>(CrudResults.validationError(getBaseModelClass(), model));
+                return new ResultOrValue<T>(CrudResults.formError(form);
             }
         }
         return new ResultOrValue<T>(model);
