@@ -8,3 +8,7 @@ resolvers += "Typesafe repository" at "http://repo.typesafe.com/typesafe/release
 
 // Use the Play sbt plugin for Play projects
 addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.2.1")
+
+// Add in pgp
+addSbtPlugin("com.typesafe.sbt" % "sbt-pgp" % "0.8.3")
+

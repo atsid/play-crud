@@ -462,9 +462,11 @@ public abstract class BaseCrudController<I, T extends Model> extends Controller 
             }
         }
     }
+
     /**
      * Creates a search expression from a string
-     * @param field The field string
+     * @param fieldQuery The field query string
+     * @param modelClass The class of the model to search
      * @return
      */
     protected Expression getSearchExpression(String fieldQuery, Class modelClass) {
@@ -531,7 +533,6 @@ public abstract class BaseCrudController<I, T extends Model> extends Controller 
      * @param query
      * @param params The service parameters
      * @param modelClass
-     * @return
      */
     protected void handleOrderBy(Query query, Class modelClass, ServiceParams params) {
         if (params.orderBy != null && params.orderBy.length > 0) {
@@ -629,7 +630,7 @@ public abstract class BaseCrudController<I, T extends Model> extends Controller 
      * Fetches is a comma separated list of sub objects on this model.
      * Examples:
      *      ?fetches=organization,organization.location
-     *      ?fetches=organization&fields=organization.name
+     *      ?fetches=organization&amp;fields=organization.name
      */
     protected void handleFetches(Query query, Class modelClass, ServiceParams params) {
         if (params.fetches != null && !params.fetches.isEmpty()) {
