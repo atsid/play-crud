@@ -690,7 +690,7 @@ abstract class BaseCrudControllerTest[M <: Model] extends Specification  {
     Step(TestUtils.startApp) ^ fs ^ Step(TestUtils.stopApp)
   }
 
-  private class HttpContextBeforeAfter(script: String) extends ScriptRunnerBeforeAfter(script) {
+  protected class HttpContextBeforeAfter(script: String) extends ScriptRunnerBeforeAfter(script) {
     var mockContext: Http.Context = null;
     var mockBody: Object = null;
 
