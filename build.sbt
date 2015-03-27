@@ -2,7 +2,7 @@ name := "play-crud"
 
 organization := "com.atsid"
 
-version := "0.9.1"
+version := "0.9.2"
 
 libraryDependencies ++= Seq(
     javaJdbc,
