@@ -125,8 +125,10 @@ public class CrudResults extends Results {
      * Returns a Result with an error message, and a BAD_REQUEST status
      * @param clazz The model class that wasn't found
      * @param model The model that has the error
+     * @deprecated This is unnecessary, we shouldn't need to re-jsonify a model object to validate it.
      * @return
      */
+    @Deprecated
     public static <T> Result validationError(Class<T> clazz, T model) {
         Form<T> form = new Form<T>(clazz).bind(Json.toJson(model));
         return formError(form);
