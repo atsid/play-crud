@@ -1,6 +1,18 @@
 package com.atsid.play.controllers;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import org.apache.commons.lang3.StringUtils;
+
+import com.atsid.play.common.EbeanUtil;
+import com.atsid.play.common.SchemaBuilder;
 import com.atsid.play.common.exceptions.InvalidFieldException;
+import com.atsid.play.models.AssociationFinder;
+import com.atsid.play.models.schema.FieldDescriptor;
+import com.atsid.play.models.schema.FieldType;
 import com.avaje.ebean.Ebean;
 import com.avaje.ebean.Expr;
 import com.avaje.ebean.Expression;
@@ -9,31 +21,19 @@ import com.avaje.ebean.FetchConfig;
 import com.avaje.ebean.Junction;
 import com.avaje.ebean.Query;
 import com.avaje.ebean.bean.EntityBean;
-import com.atsid.play.common.EbeanUtil;
-import com.atsid.play.common.SchemaBuilder;
-import com.atsid.play.models.AssociationFinder;
-import com.atsid.play.models.schema.FieldDescriptor;
-import com.atsid.play.models.schema.FieldType;
-
-import org.apache.commons.lang3.StringUtils;
-
 import com.fasterxml.jackson.databind.JsonNode;
 
 import play.Logger;
 import play.Play;
 import play.data.Form;
 import play.db.ebean.Model;
-import play.libs.F.Promise;
 import play.libs.F.Function0;
+import play.libs.F.Promise;
+import play.libs.F.Tuple;
 import play.libs.Json;
 import play.mvc.BodyParser;
 import play.mvc.Controller;
 import play.mvc.Result;
-import play.mvc.With;
-
-import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public abstract class BaseCrudController<I, T extends Model> extends Controller {
     private final Class<T> modelClass;
@@ -120,8 +120,34 @@ public abstract class BaseCrudController<I, T extends Model> extends Controller 
      * @return A promise containing the results
      */
     public Promise<Result> list(final int offset, final Integer count, final String orderBy, final String fields, final String fetches, final String queryString) {
-        return Promise.promise(new Function0<Result>() {
-            public Result apply() {
+    	Promise<Tuple<Query<T>, List<T>>> promise = listModelObject(offset, count, orderBy, fields, fetches, queryString);    
+    	return promise.flatMap((tuple) -> {
+    		final Query<T> query = tuple._1;
+    		final List<T> data = tuple._2;
+    		return Promise.promise(new Function0<Result>() {
+
+				@Override
+				public Result apply() throws Throwable {
+					return CrudResults.successCount(query.getMaxRows(), data.size(), data);
+				}
+    		});
+    	});
+    }
+
+    /**
+     * Action
+     * Query a list of models.
+     * @param offset An offset from the first item to start filtering from.  Used for paging.
+     * @param count The total count to query.  This is the length of items to query after the offset.  Used for paging.
+     * @param orderBy Order the queried models in order by the given properties of the model.
+     * @param fields The fields, or properties, of the models to retrieve.
+     * @param fetches If the model has 1to1 relationships, use this to retrieve those relationships.  By default, returns the id of each relationship.
+     * @param queryString Filter the models with a comma-delimited query string in the format of "property:value".
+     * @return A promise containing the list of model objects
+     */
+    protected Promise<Tuple<Query<T>, List<T>>> listModelObject(final int offset, final Integer count, final String orderBy, final String fields, final String fetches, final String queryString) {
+        return Promise.promise(new Function0<Tuple<Query<T>, List<T>>>() {
+            public Tuple<Query<T>, List<T>>apply() {
                 if (count == null) {
                     Logger.warn("No count specified on request: " + request().uri());
                 }
@@ -130,15 +156,11 @@ public abstract class BaseCrudController<I, T extends Model> extends Controller 
                 updateQuery(query, params);
 
                 List<T> modelList = queryList(query, params);
-
-                return CrudResults.successCount(
-                    query.findRowCount(),
-                    modelList.size(),
-                    modelList);
+                return new Tuple<>(query, modelList);
             }
         });
     }
-
+    
     /**
      * Action
      * Read a single model.
