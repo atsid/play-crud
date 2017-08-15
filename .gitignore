@@ -17,3 +17,5 @@ dist
 conf/evolutions
 pl
 projectFilesBackup
+.cache-main
+.cache-tests
